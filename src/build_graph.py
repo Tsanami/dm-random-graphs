@@ -12,7 +12,6 @@ def build_knn_graph(data: np.ndarray, k: int) -> nx.Graph:
     if k <= 0:
         raise ValueError("k должно быть положительным.")
 
-    n = data.shape[0]
     G = nx.Graph()
 
     for i, coord in enumerate(data):
