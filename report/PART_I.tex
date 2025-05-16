@@ -1,0 +1,311 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{float}
+
+\title{Отчет по проверке гипотез с использованием случайных графов \\
+Часть I}
+\author{Равиль Гареев}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Введение}
+В работе исследуется применение случайных графов (KNN-графов и дистанционных графов) для проверки гипотез согласия. 
+Цель — определить, насколько характеристики графов позволяют различать выборки из двух распределений: \(\chi^2\) (гипотеза \(H_0\)) и \(\chi\) (гипотеза \(H_1\)).
+
+\section{Описание кода}
+
+\subsection{Используемые инструменты}
+\begin{itemize}
+    \item \textbf{Python 3.10+}: Базовый язык разработки с строгой типизацией
+    \item \textbf{Библиотеки}:
+    \begin{itemize}
+        \item \texttt{numpy}: Векторизованные вычисления и работа с массивами
+        \item \texttt{scipy.stats}: Генерация $\chi^2$ и $\chi$ распределений
+        \item \texttt{scikit-learn}: Оптимизированное построение KNN-графов
+        \item \texttt{networkx 3.0+}: Топологический анализ и алгоритмы на графах
+        \item \texttt{matplotlib/seaborn}: Визуализация распределений характеристик
+        \item \texttt{tqdm}: Интерактивные прогресс-бары для длительных вычислений
+    \end{itemize}
+    \item \textbf{Архитектура}: Модульная структура с разделением на генерацию данных, построение графов и анализ
+\end{itemize}
+
+\subsection{UML-диаграмма класса GraphAnalyzer}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{uml_diagram.png}
+    \caption{Диаграмма класса GraphAnalyzer с методами анализа}
+    \label{fig:uml_graph}
+\end{figure}
+
+\subsection{Реализованные компоненты}
+\begin{itemize}
+    \item \textbf{Генераторы данных (distribution\_generators.py)}:
+    \begin{itemize}
+        \item $\chi^2$-распределение: Адаптер для \texttt{chi2.rvs()} с параметрами:
+        \begin{itemize}
+            \item \texttt{nu} - степени свободы
+            \item \texttt{n} - размер выборки
+        \end{itemize}
+        \item $\chi$-распределение: Обертка для \texttt{chi.rvs()} с аналогичными параметрами
+    \end{itemize}
+    
+    \item \textbf{Построители графов (build\_graph.py)}:
+    \begin{itemize}
+        \item \textbf{KNN-граф}:
+        \begin{enumerate}
+            \item Поиск $k+1$ ближайших соседей через \texttt{NearestNeighbors}
+            \item Фильтрация петель (i $\neq$ j)
+            \item Сохранение координат в атрибуте узлов
+        \end{enumerate}
+        
+        \item \textbf{Дистанционный граф}:
+        \begin{enumerate}
+            \item Полный перебор всех пар вершин
+            \item Проверка условия $|x_i - x_j| \leq d$
+        \end{enumerate}
+    \end{itemize}
+
+
+    \\
+    
+    \item \textbf{Анализатор графов (graph\_analyzer.py)}:
+    \begin{itemize}
+            \item Расчёт степеней вершин: \texttt{max\_degree()}, \texttt{min\_degree()}
+            \item Компоненты связности: \texttt{connected\_components()}
+            \item Топологический анализ: \texttt{articulation\_points()}, \texttt{count\_triangles()}
+            \item Раскраска графов: адаптивный алгоритм DSATUR в \texttt{chromatic\_number()}
+            \item Клики: Алгоритм двух указателей для 1D в \texttt{clique\_number()}
+            \item Оптимизационные задачи: независимые множества (\texttt{max\_independent\_set()}), доминирующие множества (\texttt{dominating\_number()})
+        \end{itemize}
+    
+    \item \textbf{Статистический анализ (hypothesis\_testing.py)}:
+    \begin{itemize}
+        \item Критическая область: \texttt{calculate\_critical\_region()} на квантилях
+        \item Мощность теста: \texttt{estimate\_power()} через сравнение с критическим значением
+    \end{itemize}
+    
+    \item \textbf{Монте-Карло симулятор (monte\_carlo.py)}:
+    \begin{enumerate}
+        \item Итеративная генерация \(n\_samples\) выборок для \(H_0\) или \(H_1\)
+        \item Динамическое построение графов (KNN/дистанционные)
+        \item Гибкий выбор метрик через рефлексию (\texttt{getattr()})
+        \item Поддержка аргументов метрик через \texttt{metric\_args}
+    \end{enumerate}
+\end{itemize}
+
+% Раздел 2: Описание экспериментов
+\section{Описание экспериментов}
+
+\subsection{Эксперимент 1: Зависимость характеристик от параметра $\nu$}
+\label{exp1}
+
+\textbf{Цель}: Исследовать, как характеристики графов (число треугольников для KNN, кликовое число для дистанционного) реагируют на изменение параметра $\nu$ в распределениях $\chi^2$ и $\chi$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{exp1_results.png}
+    \caption{Зависимость характеристик от $\nu$ (слева — KNN-граф, справа — дистанционный)}
+    \label{fig:exp1}
+\end{figure}
+
+\textbf{Ключевые наблюдения}:
+\begin{itemize}
+    \item \textbf{KNN-граф (число треугольников)}:
+        \begin{itemize}
+            \item Минимальная чувствительность: различия между $\chi^2$ и $\chi$ не превышают 0.4\% для всех $\nu$
+            \item Стабильность: значения остаются в диапазоне 3012-3035 при любом $\nu$
+        \end{itemize}
+        
+    \item \textbf{Дистанционный граф (кликовое число)}:
+        \begin{itemize}
+            \item Катастрофическое различие: при $\nu=3$ значения для $\chi$ в 2.13 раза выше ($113.2$ vs $53.5$)
+            \item Парадоксальный рост: разрыв увеличивается с ростом $\nu$ (см. Табл.~\ref{tab:exp1})
+            \item При $\nu=20$: $\chi$ показывает более чем в 5 раз большее кликовое число ($110$ vs $20$)
+        \end{itemize}
+\end{itemize}
+
+\textbf{Статистика}:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        $\nu$ & $H_0^{\text{DIST}}$ & $H_1^{\text{DIST}}$ & $\Delta_{\text{DIST}}$ (\%) & Отношение \\ \hline
+        3 & 53.5 & 113.3 & +111.8\% & 2.12x \\ 
+        5 & 38.1 & 111.2 & +191.9\% & 2.92x \\ 
+        7 & 31.9 & 110.1 & +245.1\% & 3.45x \\ 
+        10 & 26.9 & 110.3 & +309.7\% & 4.10x \\ 
+        12 & 24.8 & 109.6 & +342.1\% & 4.42x \\ 
+        15 & 22.7 & 109.4 & +381.9\% & 4.82x \\ 
+        20 & 20.3 & 110.2 & +442.9\% & 5.43x \\ \hline
+    \end{tabular}
+    \caption{Результаты для дистанционного графа ($\Delta = \frac{|H_1 - H_0|}{H_0} \times 100\%$)}
+    \label{tab:exp1}
+\end{table}
+
+\textbf{Выводы}:
+\begin{itemize}
+    \item \textbf{KNN-граф}:
+        \begin{itemize}
+            \item Полностью неэффективен для различения распределений
+            \item Число треугольников практически идентично для $\chi^2$ и $\chi$
+        \end{itemize}
+    
+    \item \textbf{Дистанционный граф}:
+        \begin{itemize}
+            \item Чрезвычайно чувствителен к типу распределения
+            \item Эффективность растет с увеличением $\nu$
+        \end{itemize}
+\end{itemize}
+
+\subsection{Эксперимент 2: Зависимость характеристик от параметров графа и размера выборки}
+\label{exp2}
+
+\textbf{Цель}: Исследовать влияние параметров графа (\(k\) для KNN, \(d\) для дистанционного) и размера выборки (\(n\)) на характеристики при фиксированных распределениях \(\chi^2(\nu=5)\) и \(\chi(\nu=5)\).
+
+\subsubsection*{Результаты}
+\begin{itemize}
+    \item \textbf{KNN-граф (число треугольников)}:
+        \begin{itemize}
+            \item \textit{Зависимость от \(k\)}:
+                \begin{itemize}
+                    \item Для \(H_0\): Рост от 1,038 (\(k=5\)) до 18,526 (\(k=20\))
+                    \item Для \(H_1\): Рост от 1,040 (\(k=5\)) до 18,606 (\(k=20\))
+                    \item Макс. разрыв: 80.7 треугольников (\(k=20\), 0.43\%)
+                \end{itemize}
+            \item \textit{Зависимость от \(n\)}:
+                \begin{itemize}
+                    \item Для \(H_0\): Рост от 1,595 (\(n=100\)) до 7,242 (\(n=500\))
+                    \item Для \(H_1\): Рост от 1,591 (\(n=100\)) до 7,259 (\(n=500\))
+                    \item Разрыв < 0.23\% для всех \(n\)
+                \end{itemize}
+        \end{itemize}
+
+    \item \textbf{Дистанционный граф (кликовое число)}:
+        \begin{itemize}
+            \item \textit{Зависимость от \(d\)}:
+                \begin{itemize}
+                    \item Для \(H_0\): Рост от 31.5 (\(d=0.5\)) до 97.7 (\(d=2.0\))
+                    \item Для \(H_1\): Рост от 92.7 (\(d=0.5\)) до 260.4 (\(d=2.0\))
+                    \item Отношение \(H_1/H_0\): от 2.94x (\(d=0.5\)) до 2.66x (\(d=2.0\))
+                \end{itemize}
+            \item \textit{Зависимость от \(n\)}:
+                \begin{itemize}
+                    \item Для \(H_0\): Рост от 57.2 (\(n=100\)) до 272.7 (\(n=500\))
+                    \item Для \(H_1\): Рост от 20.7 (\(n=100\)) до 87.4 (\(n=500\))
+                    \item Отношение \(H_0/H_1\): от 2.76x (\(n=100\)) до 3.12x (\(n=500\))
+                \end{itemize}
+        \end{itemize}
+\end{itemize}
+
+\subsubsection*{Ключевые выводы}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        \textbf{Параметр} & \textbf{KNN (\(\Delta_{max}\), \%)} & \textbf{DIST (\(\Delta_{max}\), \%)} & \textbf{DIST (Отношение)} \\ \hline
+        \(k=5 \to 20\) & 0.43 & — & — \\ 
+        \(d=0.5 \to 2.0\) & — & 726.0\% & 2.94x \(\to\) 2.66x \\ 
+        \(n=100 \to 500\) & 0.23 & 377.1\% & 2.76x \(\to\) 3.12x \\ \hline
+    \end{tabular}
+    \caption{Сводка результатов (\(\Delta = \frac{|H_1 - H_0|}{H_0} \times 100\%\))}
+    \label{tab:exp2_summary}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{KNN-граф}:
+        \begin{itemize}
+            \item Число треугольников растёт с \(k\) и \(n\), но не различает \(H_0/H_1\)
+            \item Максимальная разница: 0.43\% при \(k=20\)
+        \end{itemize}
+
+    \item \textbf{Дистанционный граф}:
+        \begin{itemize}
+            \item Кликовое число демонстрирует:
+                \begin{itemize}
+                    \item Максимальную чувствительность при \(d=0.5\) (\(\Delta=194.4\%\))
+                    \item Стабильный рост различий с увеличением \(n\) (\(\Delta=377.1\%\))
+                \end{itemize}
+            \item Отношение \(H_0/H_1\) сохраняется в диапазоне 2.66x–3.12x
+        \end{itemize}
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \(\nu\) & \(H_0^{\text{DIST}}\) & \(H_1^{\text{DIST}}\) & \(\Delta_{\text{DIST}}\) (\%) & Отношение \\ \hline
+        0.5 & 31.5 & 92.7 & +194.4\% & 2.94x \\ 
+        1.0 & 55.0 & 164.6 & +199.3\% & 2.99x \\ 
+        1.5 & 76.2 & 222.2 & +191.6\% & 2.92x \\ 
+        2.0 & 97.7 & 260.4 & +166.5\% & 2.66x \\ \hline
+    \end{tabular}
+    \caption{Зависимость от \(d\) для дистанционного графа (\(n=300\))}
+    \label{tab:dist_d}
+\end{table}
+
+\subsection{Эксперимент 3: Проверка гипотез с критической областью}
+\label{exp3}
+
+\textbf{Цель}: Оценить эффективность критериев для различения \(\chi^2(\nu=5)\) и \(\chi(\nu=5)\) при \(\alpha=0.05\).
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Метрика} & \textbf{KNN-граф} & \textbf{Дистанционный граф} \\ \hline
+        Критическое значение & 7,507.15 & 97.05 \\ 
+        FPR (Ошибка I рода) & 5.00\% & 5.00\% \\ 
+        TPR (Мощность) & 4.80\% & 100.00\% \\ 
+        AUC-ROC & 0.545 & 1.000 \\ \hline
+    \end{tabular}
+    \caption{Сравнение критериев (\(n=500\), \(k=10\), \(d=1.0\))}
+    \label{tab:exp3_results}
+\end{table}
+
+\subsubsection*{Анализ результатов}
+\begin{itemize}
+    \item \textbf{KNN-граф (число треугольников)}:
+        \begin{itemize}
+            \item Низкая мощность (4.8\%): Менее 5\% выборок \(H_1\) попадают в критическую область
+            \item AUC 0.545: Незначительное улучшение над случайным угадыванием (0.5)
+            \item FPR строго соответствует уровню \(\alpha=0.05\)
+        \end{itemize}
+        
+    \item \textbf{Дистанционный граф (кликовое число)}:
+        \begin{itemize}
+            \item Идеальная сепарация: AUC=1.0 и мощность=100\% 
+            \item Все выборки \(H_1\) превышают критическое значение
+            \item Стабильный контроль ошибки I рода (ровно 5\%)
+        \end{itemize}
+\end{itemize}
+
+\subsubsection*{Практические выводы}
+\begin{itemize}
+    \item Дистанционный граф с характеристикой "кликовое число" демонстрирует:
+        \begin{itemize}
+            \item Абсолютную надежность при \(d=1.0\)
+            \item Эффективный контроль ошибок обоих типов
+        \end{itemize}
+    \item KNN-граф требует:
+        \begin{itemize}
+            \item Пересмотра используемой характеристики (число треугольников неинформативно)
+            \item Дополнительных исследований для поиска значимых метрик
+        \end{itemize}
+    \item Оптимальная конфигурация: \(d=1.0\), \(n \geq 500\) гарантирует AUC=1.0
+\end{itemize}
+
+% Заключение
+\section*{Заключение}
+\begin{itemize}
+    \item KNN-граф не подходит для проверки гипотез в текущей конфигурации.
+    \item Дистанционный граф с характеристикой «кликовое число» показал идеальное разделение (\(AUC = 1.0\)).
+    \item Возможно, для KNN-графа стоит изучить другие характеристики.
+\end{itemize}
+
+\end{document}
