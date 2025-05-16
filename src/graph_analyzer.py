@@ -83,6 +83,7 @@ class GraphAnalyzer:
         if exact:
             if self.n > warn_threshold:
 <<<<<<< HEAD
+<<<<<<< HEAD
                 print(
 <<<<<<< HEAD
                     f"[WARNING] Этот метод медленный для n > {warn_threshold}."
@@ -95,6 +96,11 @@ class GraphAnalyzer:
 =======
                 print(f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
 >>>>>>> b83a309 (testing ci 2)
+=======
+                print(
+                    f"[WARNING] Этот метод медленный для n > {warn_threshold}."
+                )
+>>>>>>> 7410ef5 (Update graph_analyzer.py)
 
             # Точный поиск: клика в дополнении ↔️ независимое множество в
             # оригинале
