@@ -36,17 +36,14 @@ class GraphAnalyzer:
         Возвращает минимум.
         """
         greedy_estimate = (
-            max(nx.coloring.greedy_color(self.G, strategy="DSATUR").values())
-            + 1
+            max(nx.coloring.greedy_color(self.G, strategy="DSATUR").values()) + 1
         )
 
         approx_estimate = greedy_estimate
 
         # приближенный метод, если граф не большой
         if self.G.number_of_nodes() < 1000:
-            approx_estimate = nx.algorithms.approximation.chromatic_number(
-                self.G
-            )
+            approx_estimate = nx.algorithms.approximation.chromatic_number(self.G)
         return min(
             greedy_estimate, approx_estimate
         )  # берем минимум из полученных результатов
@@ -71,9 +68,7 @@ class GraphAnalyzer:
             max_clique = max(max_clique, j - i)
         return max_clique
 
-    def max_independent_set(
-        self, exact: bool = False, warn_threshold: int = 30
-    ) -> int:
+    def max_independent_set(self, exact: bool = False, warn_threshold: int = 30) -> int:
         """
         Находит размер максимального независимого множества.
         Параметры:
@@ -82,9 +77,7 @@ class GraphAnalyzer:
         """
         if exact:
             if self.n > warn_threshold:
-                print(
-                    f"[WARNING] Этот метод медленный для n > {warn_threshold}."
-                )
+                print(f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
 
             # Точный поиск: клика в дополнении ↔
             # независимое множество в оригинале
@@ -95,8 +88,9 @@ class GraphAnalyzer:
         else:
             # Быстрая аппроксимация
             approx_set = (
-                nx.algorithms.approximation.independent_set
-                .maximum_independent_set(self.G)
+                nx.algorithms.approximation.independent_set.maximum_independent_set(
+                    self.G
+                )
             )
             return len(approx_set)
 
