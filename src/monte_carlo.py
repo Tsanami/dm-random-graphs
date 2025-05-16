@@ -1,7 +1,6 @@
 """
 Функции для проведения Monte Carlo экспериментов и критической области.
 """
-
 import numpy as np
 from .build_graph import build_knn_graph, build_distance_graph
 from .graph_analyzer import GraphAnalyzer
