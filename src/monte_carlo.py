@@ -20,9 +20,7 @@ def monte_carlo_simulation(
         Массив значений характеристики для всех симуляций.
     """
     if graph_type not in ["knn", "distance"]:
-        raise ValueError(
-            "Недопустимый тип графа. Используйте 'knn' или 'distance'."
-        )
+        raise ValueError("Недопустимый тип графа. Используйте 'knn' или 'distance'.")
 
     T_values = []
 
@@ -40,9 +38,7 @@ def monte_carlo_simulation(
         analyzer = GraphAnalyzer(G)
 
         if not hasattr(analyzer, metric):
-            raise ValueError(
-                f"Метрика {metric} не существует в GraphAnalyzer."
-            )
+            raise ValueError(f"Метрика {metric} не существует в GraphAnalyzer.")
 
         if metric_args is None:
             metric_args = {}
