@@ -1,9 +1,11 @@
 import networkx as nx
 import numpy as np
 
-
 class GraphAnalyzer:
-    def __init__(self, G: nx.Graph) -> None:
+    def __init__(
+        self,
+        G: nx.Graph
+    ) -> None:
         """Инициализирует анализатор графов по матрице смежности."""
         if isinstance(G, np.ndarray):
             self.G = nx.from_numpy_array(G)
@@ -31,6 +33,21 @@ class GraphAnalyzer:
         """Подсчитывает общее количество треугольников в графе."""
         return sum(nx.triangles(self.G).values()) // 3
 
+    # def chromatic_number(self) -> int:
+    #     """
+    #     Оценивает хроматическое число графа с помощью:
+    #     1) жадного алгоритма (DSATUR)
+    #     2) приближенных методов для небольших графов
+    #     Возвращает минимум.
+    #     """
+    #     greedy_estimate = max(nx.coloring.greedy_color(self.G, strategy="DSATUR").values()) + 1
+
+    #     approx_estimate = greedy_estimate
+    
+    #     # приближенный метод, если граф не большой
+    #     if self.G.number_of_nodes() < 1000:
+    #         approx_estimate = nx.algorithms.approximation.chromatic_number(self.G)
+    #     return min(greedy_estimate, approx_estimate) # берем минимум из полученных результатов
     def chromatic_number(self) -> int:
         """Жадное приближение хроматического числа (DSATUR)."""
         # Используем только greedy DSATUR
@@ -42,12 +59,12 @@ class GraphAnalyzer:
         d - dist в дистанционном графе"""
         if self.G.number_of_nodes() == 0:
             raise ValueError("Граф пуст")
-
+    
         # Извлекаем координаты из атрибутов узлов
 
-        data = [self.G.nodes[node]["x"] for node in self.G.nodes]
+        data = [self.G.nodes[node]['x'] for node in self.G.nodes]
         x = np.sort(data)
-
+    
         max_clique = 0
         j = 0
         n = len(x)
@@ -57,7 +74,11 @@ class GraphAnalyzer:
             max_clique = max(max_clique, j - i)
         return max_clique
 
-    def max_independent_set(self, exact: bool = False, warn_threshold: int = 30) -> int:
+    def max_independent_set(
+        self,
+        exact: bool = False,
+        warn_threshold: int = 30
+    ) -> int:
         """
         Находит размер максимального независимого множества.
         Параметры:
@@ -68,8 +89,7 @@ class GraphAnalyzer:
             if self.n > warn_threshold:
                 print(f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
 
-            # Точный поиск: клика в дополнении ↔️ независимое множество в
-            # оригинале
+            # Точный поиск: клика в дополнении ↔️ независимое множество в оригинале
             comp = nx.complement(self.G)
             largest_clique = max(nx.find_cliques(comp), key=len)
             return len(largest_clique)
