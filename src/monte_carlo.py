@@ -9,11 +9,12 @@ def monte_carlo_simulation(
     n_samples: int = 1000,
     graph_type: str = "knn",
     graph_param: float | int = 3,  # k для KNN, d для дистанционного
-    metric: str = "count_triangles",  # Название характеристики из GraphAnalyzer
+    metric: str = "count_triangles",  # характеристика из GraphAnalyzer
     metric_args: dict = None,  # Новый параметр для аргументов
 ) -> np.ndarray:
     """
-    Выполняет симуляцию методом Монте-Карло для оценки распределения характеристики графа.
+    Выполняет симуляцию методом Монте-Карло для
+    оценки распределения характеристики графа.
 
     Возвращает:
         Массив значений характеристики для всех симуляций.
