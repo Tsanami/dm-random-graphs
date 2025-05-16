@@ -17,7 +17,8 @@ def plot_distributions(
         h0_stats (np.ndarray): Статистика для гипотезы H0.
         h1_stats (np.ndarray): Статистика для гипотезы H1.
         metric_name (str): Название метрики для подписей.
-        save_path (str): Путь для сохранения графика. Если None, график отображается.
+        save_path (str): Путь для сохранения графика,
+        если None, график отображается.
     """
     plt.figure(figsize=(10, 6))
     sns.kdeplot(h0_stats, label="H0", fill=True, alpha=0.5, color="blue")
@@ -49,7 +50,8 @@ def plot_line(
         y_label (str): Подпись оси Y.
         title (str): Заголовок графика.
         color (str): Цвет линии.
-        save_path (str, optional): Путь для сохранения изображения. Если None, покажет график.
+        save_path (str, optional): Путь для сохранения изображения,
+        если None, покажет график.
     """
     plt.figure(figsize=(10, 5))
     plt.plot(
