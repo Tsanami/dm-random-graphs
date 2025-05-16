@@ -86,19 +86,22 @@ class GraphAnalyzer:
                     f"[WARNING] Этот метод медленный для n > {warn_threshold}."
                 )
 
-            # Точный поиск: клика в дополнении ↔ независимое множество в оригинале
+            # Точный поиск: клика в дополнении ↔
+            # независимое множество в оригинале
             comp = nx.complement(self.G)
             largest_clique = max(nx.find_cliques(comp), key=len)
             return len(largest_clique)
 
         else:
             # Быстрая аппроксимация
-            approx_set = nx.algorithms.approximation.independent_set.maximum_independent_set(
-                self.G
+            approx_set = (
+                nx.algorithms.approximation.independent_set
+                .maximum_independent_set(self.G)
             )
             return len(approx_set)
 
     def dominating_number(self) -> int:
-        """Возвращает размер доминирующего множества, найденного приближенным методом."""
+        """Возвращает размер доминирующего множества,
+        найденного приближенным методом."""
         dominating_set = nx.algorithms.dominating_set(self.G)
         return len(dominating_set)
