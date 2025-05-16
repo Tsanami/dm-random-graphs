@@ -1,3 +1,6 @@
+"""
+Функции для проведения Monte Carlo экспериментов и критической области.
+"""
 import numpy as np
 from .build_graph import build_knn_graph, build_distance_graph
 from .graph_analyzer import GraphAnalyzer
@@ -17,7 +20,9 @@ def monte_carlo_simulation(
     оценки распределения характеристики графа.
 
     Возвращает:
-        Массив значений характеристики для всех симуляций.
+    -------
+    np.ndarray
+        Массив значений статистики длины n_samples
     """
     if graph_type not in ["knn", "distance"]:
         raise ValueError("Недопустимый тип графа. Используйте 'knn' или 'distance'.")
@@ -25,7 +30,7 @@ def monte_carlo_simulation(
     T_values = []
 
     for _ in range(n_samples):
-        # 1. Генерация данных
+        # генерируем данные
         data = distribution(**params)
 
         # 2. Построение графа
