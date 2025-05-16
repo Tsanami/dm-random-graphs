@@ -1,7 +1,10 @@
+from scipy.stats import chi, chi2
 import numpy as np
 
-def generate_h0(n, mu=0, sigma=1): # временно
-    return np.random.normal(mu, sigma, n)
+def generate_chi2(nu: int, n: int) -> np.ndarray:
+    """Генерация данных из χ²"""
+    return chi2.rvs(df=nu, size=n)
 
-def generate_h1(n, lam=1): # временно
-    return np.random.exponential(1/lam, n)
+def generate_chi(nu: int, n: int) -> np.ndarray:
+    """Генерация данных из χ"""
+    return chi.rvs(df=nu, size=n)
