@@ -73,7 +73,8 @@ class GraphAnalyzer:
             max_clique = max(max_clique, j - i)
         return max_clique
 
-    def max_independent_set(self, exact: bool = False, warn_threshold: int = 30) -> int:
+    def max_independent_set(self, exact: bool = False,
+                            warn_threshold: int = 30) -> int:
         """
         Находит размер максимального независимого множества.
         Параметры:
@@ -83,11 +84,18 @@ class GraphAnalyzer:
         if exact:
             if self.n > warn_threshold:
                 print(
+<<<<<<< HEAD
                     f"[WARNING] Этот метод медленный для n > {warn_threshold}."
                 )
 
             # Точный поиск: клика в дополнении ↔
             # независимое множество в оригинале
+=======
+                    f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
+
+            # Точный поиск: клика в дополнении ↔️ независимое множество в
+            # оригинале
+>>>>>>> 99788b4 (testing ci)
             comp = nx.complement(self.G)
             largest_clique = max(nx.find_cliques(comp), key=len)
             return len(largest_clique)
