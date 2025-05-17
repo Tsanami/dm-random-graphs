@@ -1,6 +1,7 @@
 """
 Функции для проведения Monte Carlo экспериментов и критической области.
 """
+
 import numpy as np
 from .build_graph import build_knn_graph, build_distance_graph
 from .graph_analyzer import GraphAnalyzer
@@ -14,7 +15,7 @@ def monte_carlo_simulation(
     graph_param: float | int = 3,  # k для KNN, d для дистанционного
     metric: str = "max_degree",  # метод GraphAnalyzer: max_degree или chromatic_number
     metric_args: dict = None,  # дополнительные аргументы для метода
-    n: int = 100
+    n: int = 100,
 ) -> np.ndarray:
     """
     Выполняет Монте-Карло симуляцию для оценки распределения статистики графа.
@@ -46,9 +47,9 @@ def monte_carlo_simulation(
         # генерируем данные
         data = distribution(**params)
         # создаем граф
-        if graph_type == 'knn':
-            A = build_knn_graph(data.reshape(-1,1), graph_param)
-        elif graph_type == 'distance':
+        if graph_type == "knn":
+            A = build_knn_graph(data.reshape(-1, 1), graph_param)
+        elif graph_type == "distance":
             A = build_distance_graph(data, graph_param)
         else:
             raise ValueError("graph_type должен быть 'knn' или 'distance'")
@@ -61,7 +62,9 @@ def monte_carlo_simulation(
     return np.array(T)
 
 
-def calculate_critical_region(h0_stats: np.ndarray, alpha: float = 0.05) -> tuple[np.ndarray, float]:
+def calculate_critical_region(
+    h0_stats: np.ndarray, alpha: float = 0.05
+) -> tuple[np.ndarray, float]:
     """
     Вычисляет критическую область и критическое значение по эмпирическому распределению h0.
 

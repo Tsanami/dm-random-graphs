@@ -1,18 +1,15 @@
 """
 Организация Monte Carlo экспериментов: генерация выборок, вычисление статистик через GraphAnalyzer, агрегация.
 """
+
 import pandas as pd
 from tqdm import tqdm
 from src.data_utils import sample_stable, sample_normal
 from src.test_statistics import T_knn, T_dist
 
+
 def run_mc_experiment(
-    dist: str,
-    params: dict,
-    graph_type: str,
-    graph_param: float,
-    n: int,
-    n_iter: int
+    dist: str, params: dict, graph_type: str, graph_param: float, n: int, n_iter: int
 ) -> pd.DataFrame:
     """
     Запускает MC-эксперимент для:
@@ -29,26 +26,26 @@ def run_mc_experiment(
     for i in tqdm(range(n_iter), desc=f"MC {dist}-{graph_type}"):
         # Генерация данных
         data = (
-            sample_stable(params['alpha'], n)
-            if dist == 'stable'
-            else sample_normal(params['sigma'], n)
+            sample_stable(params["alpha"], n)
+            if dist == "stable"
+            else sample_normal(params["sigma"], n)
         )
         # Вычисление статистики
-        if graph_type == 'knn':
+        if graph_type == "knn":
             stat = T_knn(data, graph_param)
-        elif graph_type == 'dist':
+        elif graph_type == "dist":
             stat = T_dist(data, graph_param)
         else:
             raise ValueError(f"Unknown graph_type: {graph_type}")
         # Сохранение результата
         record = {
-            'dist': dist,
+            "dist": dist,
             **params,
-            'graph_type': graph_type,
-            'graph_param': graph_param,
-            'n': n,
-            'stat': stat,
-            'iter': i
+            "graph_type": graph_type,
+            "graph_param": graph_param,
+            "n": n,
+            "stat": stat,
+            "iter": i,
         }
         records.append(record)
     return pd.DataFrame(records)
@@ -60,10 +57,7 @@ def aggregate_results(df: pd.DataFrame) -> pd.DataFrame:
     и возвращает среднее и стандартное отклонение статистики.
     """
     return (
-        df
-        .groupby(['dist', 'graph_type', 'graph_param', 'n'])
-        .stat
-        .agg(['mean', 'std'])
+        df.groupby(["dist", "graph_type", "graph_param", "n"])
+        .stat.agg(["mean", "std"])
         .reset_index()
     )
-

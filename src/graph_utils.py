@@ -2,6 +2,7 @@
 graph_utils.py
 Модуль для построения графов и вычисления статистик: KNN, пороговых, максимальная степень и жадное хроматическое число.
 """
+
 import numpy as np
 import networkx as nx
 from sklearn.neighbors import NearestNeighbors
@@ -23,8 +24,8 @@ def build_knn_graph(X: np.ndarray, k: int) -> np.ndarray:
     adjacency : np.ndarray, shape (n_samples, n_samples)
         Матрица смежности (0/1).
     """
-    nbrs = NearestNeighbors(n_neighbors=k + 1).fit(X.reshape(-1,1))
-    A = nbrs.kneighbors_graph(X.reshape(-1,1)).toarray().astype(int)
+    nbrs = NearestNeighbors(n_neighbors=k + 1).fit(X.reshape(-1, 1))
+    A = nbrs.kneighbors_graph(X.reshape(-1, 1)).toarray().astype(int)
     np.fill_diagonal(A, 0)
     return A
 
@@ -73,5 +74,5 @@ def greedy_chromatic_number(A: np.ndarray) -> int:
     жадным алгоритмом раскраски.
     """
     G = adjacency_to_graph(A)
-    coloring = nx.coloring.greedy_color(G, strategy='largest_first')
+    coloring = nx.coloring.greedy_color(G, strategy="largest_first")
     return max(coloring.values()) + 1
