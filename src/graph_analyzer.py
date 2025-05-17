@@ -31,21 +31,6 @@ class GraphAnalyzer:
         """Подсчитывает общее количество треугольников в графе."""
         return sum(nx.triangles(self.G).values()) // 3
 
-    # def chromatic_number(self) -> int:
-    #     """
-    #     Оценивает хроматическое число графа с помощью:
-    #     1) жадного алгоритма (DSATUR)
-    #     2) приближенных методов для небольших графов
-    #     Возвращает минимум.
-    #     """
-    #     greedy_estimate = max(nx.coloring.greedy_color(self.G, strategy="DSATUR").values()) + 1
-
-    #     approx_estimate = greedy_estimate
-
-    #     # приближенный метод, если граф не большой
-    #     if self.G.number_of_nodes() < 1000:
-    #         approx_estimate = nx.algorithms.approximation.chromatic_number(self.G)
-    #     return min(greedy_estimate, approx_estimate) # берем минимум из полученных результатов
     def chromatic_number(self) -> int:
         """Жадное приближение хроматического числа (DSATUR)."""
         # Используем только greedy DSATUR
@@ -72,7 +57,8 @@ class GraphAnalyzer:
             max_clique = max(max_clique, j - i)
         return max_clique
 
-    def max_independent_set(self, exact: bool = False, warn_threshold: int = 30) -> int:
+    def max_independent_set(self, exact: bool = False,
+                            warn_threshold: int = 30) -> int:
         """
         Находит размер максимального независимого множества.
         Параметры:
@@ -81,9 +67,11 @@ class GraphAnalyzer:
         """
         if exact:
             if self.n > warn_threshold:
-                print(f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
+                print(
+                    f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
 
-            # Точный поиск: клика в дополнении ↔️ независимое множество в оригинале
+            # Точный поиск: клика в дополнении ↔️ независимое множество в
+            # оригинале
             comp = nx.complement(self.G)
             largest_clique = max(nx.find_cliques(comp), key=len)
             return len(largest_clique)
