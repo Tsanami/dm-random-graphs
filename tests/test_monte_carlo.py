@@ -1,6 +1,6 @@
 import numpy as np
 from src.monte_carlo import monte_carlo_simulation, calculate_critical_region, estimate_power
-from src.data_utils import sample_normal
+from src.distribution_generators import sample_normal
 
 
 def test_monte_carlo_simulation_shape_and_values():
