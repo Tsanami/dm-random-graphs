@@ -1,4 +1,4 @@
-# dm-random-graphs# DM Random Graphs
+# DM Random Graphs
 
 [![CI Status](https://github.com/Tsanami/dm-random-graphs/actions/workflows/ci.yml/badge.svg)](https://github.com/Tsanami/dm-random-graphs/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
