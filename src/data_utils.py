@@ -20,14 +20,14 @@ def sample_stable(alpha: float, n: int) -> np.ndarray:
     samples : np.ndarray, shape (n,)
     """
     # Сэмплируем по формуле Чамберса–Маллин–Стэпса
-    U = np.random.uniform(-np.pi/2, np.pi/2, size=n)
+    U = np.random.uniform(-np.pi / 2, np.pi / 2, size=n)
     W = np.random.exponential(scale=1.0, size=n)
     if alpha == 1.0:
         # Cauchy case
         return np.tan(U)
     else:
         numerator = np.sin(alpha * U)
-        denominator = (np.cos(U))**(1/alpha)
+        denominator = (np.cos(U)) ** (1 / alpha)
         frac = numerator / denominator
         factor = (np.cos(U - alpha * U) / W) ** ((1 - alpha) / alpha)
         return frac * factor
@@ -38,4 +38,3 @@ def sample_normal(sigma: float, n: int) -> np.ndarray:
     Генерация n сэмплов из нормального распределения N(0, sigma^2).
     """
     return np.random.normal(loc=0.0, scale=sigma, size=n)
-
