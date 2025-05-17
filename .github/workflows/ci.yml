@@ -1,31 +1,66 @@
+# name: CI
+
+# on: [push, pull_request]
+
+# jobs:
+#   lint-python:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: "3.10"
+#       - name: Install dependencies
+#         run: pip install flake8
+#       - name: Lint Python
+#         run: flake8 src/
+
+#   format-python:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: "3.10"
+#       - name: Install black
+#         run: pip install black
+#       - name: Check formatting
+#         run: black --check src/
+
 name: CI
 
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
 
 jobs:
   lint-python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-      - name: Install dependencies
-        run: pip install flake8
-      - name: Lint Python
-        run: flake8 src/
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.10' }
+      - run: pip install flake8
+      - run: flake8 src/
 
   format-python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-      - name: Install black
-        run: pip install black
-      - name: Check formatting
-        run: black --check src/
-        
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.10' }
+      - run: pip install black
+      - run: black --check src/
+
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.10' }
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest -q
