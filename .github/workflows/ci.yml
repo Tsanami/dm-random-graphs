@@ -56,7 +56,9 @@
 #       - run: black --check src/
 name: CI
 
-on: [push, pull_request]
+on:
+  - push
+  - pull_request
 
 jobs:
   lint-python:
