@@ -1,7 +1,6 @@
 import networkx as nx
 from sklearn.neighbors import NearestNeighbors
 import numpy as np
-import networkx as nx
 
 
 def build_knn_graph(data: np.ndarray, k: int) -> nx.Graph:

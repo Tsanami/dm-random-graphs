@@ -11,6 +11,7 @@ def generate_chi(nu: int, n: int) -> np.ndarray:
     """Генерация данных из χ"""
     return chi.rvs(df=nu, size=n)
 
+
 def sample_stable(alpha: float, n: int) -> np.ndarray:
     """
     Генерация n сэмплов из симметричного стабильного распределения Stable(alpha).

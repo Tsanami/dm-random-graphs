@@ -1,11 +1,9 @@
 import networkx as nx
 import numpy as np
 
+
 class GraphAnalyzer:
-    def __init__(
-        self,
-        G: nx.Graph
-    ) -> None:
+    def __init__(self, G: nx.Graph) -> None:
         """Инициализирует анализатор графов по матрице смежности."""
         if isinstance(G, np.ndarray):
             self.G = nx.from_numpy_array(G)
@@ -34,24 +32,10 @@ class GraphAnalyzer:
         return sum(nx.triangles(self.G).values()) // 3
 
     def chromatic_number(self) -> int:
-        """
-        Оценивает хроматическое число графа с помощью:
-        1) жадного алгоритма (DSATUR)
-        2) приближенных методов для небольших графов
-        Возвращает минимум.
-        """
-        greedy_estimate = (
-            max(nx.coloring.greedy_color(self.G, strategy="DSATUR").values()) + 1
-        )
-
-        approx_estimate = greedy_estimate
-
-        # приближенный метод, если граф не большой
-        if self.G.number_of_nodes() < 1000:
-            approx_estimate = nx.algorithms.approximation.chromatic_number(self.G)
-        return min(
-            greedy_estimate, approx_estimate
-        )  # берем минимум из полученных результатов
+        """Жадное приближение хроматического числа (DSATUR)."""
+        # Используем только greedy DSATUR
+        colors = nx.coloring.greedy_color(self.G, strategy="DSATUR")
+        return max(colors.values()) + 1
 
     def clique_number(self, d: float) -> int:
         """Возвращает размер наибольшей клики в графе.
@@ -82,29 +66,10 @@ class GraphAnalyzer:
         """
         if exact:
             if self.n > warn_threshold:
-<<<<<<< HEAD
-<<<<<<< HEAD
-                print(
-<<<<<<< HEAD
-                    f"[WARNING] Этот метод медленный для n > {warn_threshold}."
-                )
-
-            # Точный поиск: клика в дополнении ↔
-            # независимое множество в оригинале
-=======
-                    f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
-=======
                 print(f"[WARNING] Этот метод медленный для n > {warn_threshold}.")
->>>>>>> b83a309 (testing ci 2)
-=======
-                print(
-                    f"[WARNING] Этот метод медленный для n > {warn_threshold}."
-                )
->>>>>>> 7410ef5 (Update graph_analyzer.py)
 
             # Точный поиск: клика в дополнении ↔️ независимое множество в
             # оригинале
->>>>>>> 99788b4 (testing ci)
             comp = nx.complement(self.G)
             largest_clique = max(nx.find_cliques(comp), key=len)
             return len(largest_clique)
@@ -119,7 +84,18 @@ class GraphAnalyzer:
             return len(approx_set)
 
     def dominating_number(self) -> int:
-        """Возвращает размер доминирующего множества,
-        найденного приближенным методом."""
+        """Возвращает размер доминирующего множества, найденного приближенным методом."""
         dominating_set = nx.algorithms.dominating_set(self.G)
         return len(dominating_set)
+
+    def min_clique_cover(self) -> int:
+        """
+        Оценивает минимальное количество клик, необходимых для покрытия всех вершин графа.
+        Реализация через раскраску дополнения графа (приближенно).
+        """
+        # Строим дополнение
+        comp = nx.complement(self.G)
+        # раскраска
+        coloring = nx.greedy_color(comp, strategy="DSATUR")
+        # Число цветов = размер покрытия кликами
+        return max(coloring.values()) + 1  # получаем приближение
