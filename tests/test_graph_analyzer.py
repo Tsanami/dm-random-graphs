@@ -19,9 +19,7 @@ def test_max_degree_and_chromatic_and_clique_and_triangles():
 
 def test_graph_analyzer_array_input_with_clique_and_triangles():
     # Матрица смежности для пути из трёх узлов
-    A = np.array([[0, 1, 0],
-                  [1, 0, 1],
-                  [0, 1, 0]])
+    A = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
     ga = GraphAnalyzer(A)
     # Проверяем максимальную степень
     assert ga.max_degree() == 2
