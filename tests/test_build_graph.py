@@ -1,6 +1,6 @@
 import numpy as np
-import networkx as nx
 from src.build_graph import build_knn_graph, build_distance_graph
+
 
 def test_build_knn_graph_small():
     data = np.array([0.0, 1.0, 2.0])
@@ -11,6 +11,7 @@ def test_build_knn_graph_small():
     # Степени
     degrees = dict(G.degree())
     assert degrees == {0: 1, 1: 2, 2: 1}
+
 
 def test_build_distance_graph_threshold():
     data = np.array([0.0, 0.5, 2.0])
