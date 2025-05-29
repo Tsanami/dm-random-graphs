@@ -111,8 +111,10 @@ def visualize_metrics(
     df, metrics=None, size_col="n", algo_col="Algorithm", figsize=(10, 6)
 ):
     """
-    Строит компактный «сеточный» график ключевых метрик по выбору размеров выборки и алгоритмов:
-    каждый алгоритм — отдельная линия, вся метрика — на одном полотне.
+    Строит компактный «сеточный» график ключевых метрик
+    по выбору размеров выборки и алгоритмов:
+    каждый алгоритм — отдельная линия, вся метрика —
+    на одном полотне.
 
     Параметры:
     -----------
@@ -140,7 +142,8 @@ def visualize_metrics(
     n_metrics = len(metrics)
     ncols = 2
     nrows = (n_metrics + 1) // ncols
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, sharex=True)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,
+                             figsize=figsize, sharex=True)
     axes = axes.flatten()
 
     for ax, metric in zip(axes, metrics):
@@ -162,13 +165,15 @@ def visualize_metrics(
 
 def visualize_feature_importances(df_imp, size_col="n"):
     """
-    Строит график изменения важности признаков из RandomForest в зависимости от размера выборки.
+    Строит график изменения важности признаков из
+    RandomForest в зависимости от размера выборки.
 
     Параметры:
     -----------
     df_imp : pandas.DataFrame
         Таблица, где индекс — значения размера выборки (n),
-        а столбцы — названия признаков, содержащие их относительную важность.
+        а столбцы — названия признаков,
+        содержащие их относительную важность.
     size_col : str
         Название индекса в df_imp, используемое по оси X (по умолчанию 'n').
     """
