@@ -142,8 +142,7 @@ def visualize_metrics(
     n_metrics = len(metrics)
     ncols = 2
     nrows = (n_metrics + 1) // ncols
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,
-                             figsize=figsize, sharex=True)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, sharex=True)
     axes = axes.flatten()
 
     for ax, metric in zip(axes, metrics):
