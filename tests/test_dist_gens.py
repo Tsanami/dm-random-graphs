@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from src.data_utils import sample_stable, sample_normal
+from src.distribution_generators import sample_stable, sample_normal
 
 
 def test_sample_normal_shape_and_stats():
