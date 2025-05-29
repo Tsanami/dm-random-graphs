@@ -60,4 +60,3 @@ def monte_carlo_simulation(
         stat = getattr(ga, metric)(**metric_args)
         T.append(stat)
     return np.array(T)
-
