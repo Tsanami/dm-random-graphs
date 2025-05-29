@@ -1,0 +1,168 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[russian]{babel}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\geometry{margin=2.5cm}
+
+\title{Отчёт по проверке гипотез \\ с использованием случайных графов \\ \small Часть I: Stable$(\alpha=1)$ vs Normal$(0,1)$}
+\author{Хамаганов Ильдар}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Введение}
+Целью данной части исследования было оценить, насколько топологические характеристики 
+случайных графов позволяют различать выборки из двух распределений:
+\begin{itemize}
+  \item H$_0$: Stable$(\alpha=1)$;
+  \item H$_1$: Normal$(0,1)$.
+\end{itemize}
+Использовались два типа графов:
+\begin{description}
+  \item[KNN‑граф:] характеристика $T^{\rm knn} = \max\deg(G)$ (максимальная степень).
+  \item[Дистанционный граф:] характеристика $T^{\rm dist} = \chi(G)$ (хроматическое число).
+\end{description}
+
+\section{Настройка окружения и код}
+\subsection*{Импорт и автозагрузка}
+\begin{verbatim}
+%load_ext autoreload
+%autoreload 2
+import sys, os
+project_root = os.path.abspath(os.path.join(os.getcwd(),'..'))
+sys.path.append(project_root)
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from tqdm import tqdm
+
+from src.data_utils import sample_stable, sample_normal
+from src.build_graph import build_knn_graph, build_distance_graph
+from src.graph_analyzer import GraphAnalyzer
+from src.monte_carlo import monte_carlo_simulation
+from src.visualization import plot_distributions, plot_critical_region
+\end{verbatim}
+
+\subsection*{Параметры экспериментов}
+\begin{itemize}
+  \item Размер выборки: $n=200$.
+  \item Число MC‑итераций: $N_{\rm MC}=500$.
+  \item Параметры KNN‑графа: $k\in\{3,5,7,10,12,15,20\}$.
+  \item Параметры дистанционного графа: $d\in\{0.5,1.0,1.5,2.0\}$.
+\end{itemize}
+
+\section{Эксперимент 1: зависимость от «ν»}
+\paragraph{Описание}
+Для каждой из двух распределений (Stable, Normal) вычисляли
+\[
+\overline{T}^{\rm knn}(k)
+=\mathbb{E}\bigl[\max\deg(G)\bigr],\quad
+\overline{T}^{\rm dist}(d)
+=\mathbb{E}\bigl[\chi(G)\bigr].
+\]
+
+\paragraph{Результаты}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.48\textwidth]{delta_vs_k.png}
+  \includegraphics[width=0.48\textwidth]{chi_vs_d.png}
+  \caption{Слева: $\overline{T}^{\rm knn}=\Delta(G)$ vs $k$. 
+           Справа: $\overline{T}^{\rm dist}=\chi(G)$ vs $d$.}
+\end{figure}
+
+\paragraph{Выводы}
+\begin{itemize}
+  \item \textbf{KNN‑граф ($T^{\rm knn}$)}: кривая почти горизонтальна, 
+    разрыв между Stable и Normal менее 1\%, распределения перекрываются.
+  \item \textbf{Дистанционный граф ($T^{\rm dist}$)}: $\chi(G)$ растёт с $d$, 
+    и для Normal значения значительно выше (до $\sim140$ vs $\sim103$ при $d=2$). 
+    Статистика хорошо разделяет гипотезы.
+\end{itemize}
+
+\section{Эксперимент 2: зависимость от $k$, $d$ и $n$}
+\paragraph{Описание}
+Исследовали:
+\begin{enumerate}
+  \item Зависимость $\overline{T}^{\rm knn}(k)$ и $\overline{T}^{\rm dist}(d)$ при $n=200$.
+  \item Зависимость при фиксированных $k=10$, $d=1.0$ от $n\in\{100,200,300,500\}$.
+\end{enumerate}
+
+\paragraph{Сводные итоги}
+\begin{table}[ht]
+\centering
+\caption{Отношение $\overline{T}^{H_1}/\overline{T}^{H_0}$}
+\begin{tabular}{lccc}
+\toprule
+Параметр       & KNN ($k$) & Dist ($d$)      & Dist ($n$)       \\
+\midrule
+Минимум        & 0.92×     & 1.47×            & 2.30×            \\
+Максимум       & 1.06×     & 2.80×            & 3.10×            \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Выводы}
+\begin{itemize}
+  \item $\Delta(G)$ увеличивается с $k,n$, но соотношение H$_1$/H$_0$ остаётся близким (≈0.9–1.06).
+  \item $\chi(G)$ показывает высокую чувствительность: отношение до ≈3× при росте $n$.
+\end{itemize}
+
+\section{Эксперимент 3: критические области и мощность}
+\paragraph{Условия} $n=500$, $k=10$, $d=1.0$, уровень значимости $\alpha=0.05$.
+
+\paragraph{Результаты}
+\begin{table}[ht]
+\centering
+\caption{Критические значения и характеристики теста}
+\begin{tabular}{lcccc}
+\toprule
+Граф               & CV    & FPR   & TPR      & AUC   \\
+\midrule
+KNN ($\Delta$)     & 18.7  & 5.0\% & 4.8\%    & 0.545 \\
+Distance ($\chi$)  & 114   & 5.0\% & 100.0\%  & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Выводы}
+\begin{itemize}
+  \item Тест на $\Delta(G)$ практически не различает гипотезы (мощность ≈ уровень α).
+  \item Тест на $\chi(G)$ обеспечивает идеальное разделение (AUC=1, мощность=100\%).
+\end{itemize}
+
+\section{Эксперимент 4: подбор параметров}
+\paragraph{Подход}
+Кросс‑валидацией 5‑fold искали параметры, максимизирующие AUC при $n=100$:
+\begin{itemize}
+  \item KNN: $k\in\{1,3,5,7,10\}$, $k^*=10$, AUC≈0.996.
+  \item Distance: $d\in\{0.1,0.5,1.0,1.5,2.0\}$, $d^*=0.1$, AUC=1.000.
+\end{itemize}
+
+\section*{Итоги и выводы}
+\begin{enumerate}
+  \item \textbf{KNN‑граф:}
+    \begin{itemize}
+      \item Оптимальное $k^*=10$.
+      \item При $n=100$, $k=10$ AUC≈0.996, но требуется точная настройка.
+    \end{itemize}
+  \item \textbf{Дистанционный граф:}
+    \begin{itemize}
+      \item Оптимальное $d^*=0.1$.
+      \item AUC=1.000 без значительной зависимости от $n$.
+    \end{itemize}
+  \item \textbf{Рекомендации:}
+    \begin{itemize}
+      \item Для надёжного критерия использовать $\chi(G)$ дистанционного графа с $d=0.1$.
+      \item Для KNN‑графа рекомендован $k=10$, $n\ge100$ при контроле стабильности.
+      \item Возможны дальнейшие улучшения: новые признаки (центральность, диаметр) и комбинированные критерии.
+    \end{itemize}
+\end{enumerate}
+
+\end{document}
