@@ -1,7 +1,13 @@
-networkx
-scikit-learn
-numpy
-scipy
-matplotlib
-seaborn
-tqdm
+# Основные библиотеки
+numpy>=1.24           # численные расчёты
+scipy>=1.10           # статистика
+pandas>=2.0           # работа с табличными данными
+networkx>=3.1         # генерация и анализ графов
+scikit-learn>=1.2     # KNN и другие алгоритмы
+matplotlib>=3.7       # визуализация графиков
+
+# Дополнительные
+pytest>=8.2
+tqdm>=4.65
+seaborn>=0.12
+

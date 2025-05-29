@@ -1,37 +1,105 @@
+"""
+Функции для проведения Monte Carlo экспериментов и критической области.
+"""
+
 import numpy as np
 from .build_graph import build_knn_graph, build_distance_graph
 from .graph_analyzer import GraphAnalyzer
 
+
 def monte_carlo_simulation(
-    distribution,  # Функция генерации данных (generate_h0/generate_h1)
-    params: dict,   # Параметры распределения ({"mu":0, "sigma":1} и тп)
+    distribution,  # функция генерации данных, например sample_stable или sample_normal
+    params: dict,  # параметры распределения, ключи соответствуют аргументам distribution
     n_samples: int = 1000,
     graph_type: str = "knn",
     graph_param: float | int = 3,  # k для KNN, d для дистанционного
-    metric: str = "count_triangles"  # Название характеристики из GraphAnalyzer
+    metric: str = "max_degree",  # метод GraphAnalyzer: max_degree или chromatic_number
+    metric_args: dict = None,  # дополнительные аргументы для метода
+    n: int = 100,
 ) -> np.ndarray:
     """
-    Выполняет симуляцию методом Монте-Карло для оценки распределения характеристики графа.
-    
+    Выполняет Монте-Карло симуляцию для оценки распределения статистики графа.
+
+    Параметры:
+    ------------
+    distribution : callable
+        Функция генерации данных, возвращает массив размера n
+    params : dict
+        Аргументы для distribution
+    n_samples : int
+        Число повторений симуляции
+    graph_type : {'knn','distance'}
+    graph_param : float or int
+    metric : {'max_degree','chromatic_number'}
+    metric_args : dict
+    n : размер выборки
+
     Возвращает:
-        Массив значений характеристики для всех симуляций.
+    -------
+    np.ndarray
+        Массив значений статистики длины n_samples
     """
-    T_values = []
-    
+    if metric_args is None:
+        metric_args = {}
+
+    T = []
     for _ in range(n_samples):
-        # 1. Генерация данных
+        # генерируем данные
         data = distribution(**params)
-        
-        # 2. Построение графа
+        # создаем граф
         if graph_type == "knn":
-            adjacency = build_knn_graph(data, k=graph_param)
+            A = build_knn_graph(data.reshape(-1, 1), graph_param)
+        elif graph_type == "distance":
+            A = build_distance_graph(data, graph_param)
         else:
-            adjacency = build_distance_graph(data, d=graph_param)
-        
-        # 3. Анализ характеристик
-        analyzer = GraphAnalyzer(adjacency)
-        T = getattr(analyzer, metric)()  # Динамический выбор характеристики
-        
-        T_values.append(T)
-    
-    return np.array(T_values)
+            raise ValueError("graph_type должен быть 'knn' или 'distance'")
+        # анализируем
+        ga = GraphAnalyzer(A)
+        if not hasattr(ga, metric):
+            raise ValueError(f"Метрика {metric} не найдена в GraphAnalyzer")
+        stat = getattr(ga, metric)(**metric_args)
+        T.append(stat)
+    return np.array(T)
+
+
+def calculate_critical_region(
+    h0_stats: np.ndarray, alpha: float = 0.05
+) -> tuple[np.ndarray, float]:
+    """
+    Вычисляет критическую область и критическое значение по эмпирическому распределению h0
+
+    Параметры:
+    -----------
+    h0_stats : np.ndarray
+        Статистика под гипотезой H0
+    alpha : float
+        Уровень значимости
+
+    Возвращает:
+    --------
+    region : np.ndarray
+        Булев массив, True если stat > критического значения
+    critical_value : float
+        (1-alpha)-квантиль h0_stats
+    """
+    critical_value = np.quantile(h0_stats, 1 - alpha)
+    region = h0_stats > critical_value
+    return region, critical_value
+
+
+def estimate_power(h1_stats: np.ndarray, critical_value: float) -> float:
+    """
+    Оценивает мощность критерия по статистикам h1 и критическому значению.
+
+    Параметры:
+    -----------
+    h1_stats : np.ndarray
+        Статистика под альтернативной гипотезой
+    critical_value : float
+
+    Возвращает:
+    --------
+    power : float
+        Доля случаев, когда h1_stats > critical_value
+    """
+    return np.mean(h1_stats > critical_value)
